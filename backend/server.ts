@@ -1,4 +1,4 @@
-import { cortiClient } from './cortiClient.js';
+import cortiClient from './cortiClient.js';
 import { predictCodes } from './codingHelper.js';
 import express from 'express';
 import cors from 'cors';
@@ -17,16 +17,21 @@ app.post("/api/interactions", async (req, res) => {
         const interaction = await cortiClient.interactions.create({
             encounter: {
                 identifier: `encounter-${Date.now()}`,
-                status: "planned",
-                type: "first_consultation",
+                status: "planned" as const,             // TypeScript needs to know the string is an enum
+                type: "first_consultation" as const,
             }
         });
         
         console.log("Interaction created:", interaction.interactionId);
         res.json(interaction);
     } catch (err) {
-        console.error("Error:", err);
-        res.status(500).json({ error: err.message });
+        if (err instanceof Error) {
+            console.log("Error:", err.message);
+            res.status(500).json({ error: err.message });
+        } else {
+            console.error("Unknown error:", err);
+            res.status(500).json({ error: "An unknown error occurred" });
+        }
     }
 });
 
@@ -46,50 +51,15 @@ app.post("/api/interactions/:id/recording", upload.single("audio"), async (req, 
         console.log("Recording uploaded:", recording);
         res.json(recording);
     } catch (err) {
-        console.error("Upload error:", err);
-        res.status(500).json({ error: "Failed to upload recording" });
+        if (err instanceof Error) {
+            console.log("Error:", err.message);
+            res.status(500).json({ error: err.message });
+        } else {
+            console.error("Unknown error:", err);
+            res.status(500).json({ error: "An unknown error occurred" });
+        }
     }
 });
-
-// // Create transcript
-// app.post("/api/interactions/:id/transcripts", async (req, res) => {
-//     try {
-//         const { recordingId, primaryLanguage } = req.body;
-
-//         if (!recordingId) {
-//             return res.status(400).json({ error: "recordingId is required" });
-//         }
-
-//         const interactionId = req.params.id;
-
-//         const transcript = await cortiClient.transcripts.create(interactionId, recordingId, primaryLanguage);
-
-//         res.json(transcript);
-//     } catch (err) {
-//         console.error("Create transcript error:", err);
-//         res.status(500).json({ error: "Failed to create transcript" });
-//     }
-// });
-
-// // Extract facts (stateless)
-// app.post("/api/tools/extract-facts", async (req, res) => {
-//     try {
-//         const { text, primaryLanguage: outputLanguage } = req.body;
-
-//         const facts = await cortiClient.facts.extract({
-//             context: [{
-//                 type: 'text',
-//                 text: text
-//             }],
-//             outputLanguage: outputLanguage
-//         });
-
-//         res.json(facts);
-//     } catch (err) {
-//         console.error("Extract facts error:", err);
-//         res.status(500).json({ error: "Failed to extract facts" });
-//     }
-// });
 
 // List available templates
 app.get("/api/templates", async (req, res) => {
@@ -100,8 +70,13 @@ app.get("/api/templates", async (req, res) => {
         console.log(`Found ${templates.length} templates`);
         res.json(templates);
     } catch (err) {
-        console.error("Error:", err);
-        res.status(500).json({ error: err.message });
+        if (err instanceof Error) {
+            console.log("Error:", err.message);
+            res.status(500).json({ error: err.message });
+        } else {
+            console.error("Unknown error:", err);
+            res.status(500).json({ error: "An unknown error occurred" });
+        }
     }
 });
 
@@ -139,12 +114,19 @@ app.post("/api/interactions/:id/documents", async (req, res) => {
         // });
 
         // const combinedFacts = factResponse.facts;
+        if (!transcriptsResponse) {
+            return res.status(500).json({ error: "Error: no transcript response" });
+        }
+
+        if (!transcriptsResponse.transcripts) {
+            return res.status(400).json({ error: "Error: no transcripts were created "});
+        }
         
         // Map over each transcript and extract facts
         const factExtractionPromises = transcriptsResponse.transcripts.map(async (transcript) => {
             const factsResponse = await cortiClient.facts.extract({
                 context: [{ 
-                    type: 'text', 
+                    type: 'text' as const, 
                     text: transcript.text 
                 }],
                 outputLanguage: outputLanguage
@@ -157,12 +139,12 @@ app.post("/api/interactions/:id/documents", async (req, res) => {
         const combinedFacts = allFactsArrays.flat();
 
         const context = [{
-            type: 'facts',
+            type: 'facts' as const,
             data: combinedFacts.map(fact => ({
                 text: fact.value,
-                source: 'core',
+                source: 'core' as const,
                 group: fact.group
-            }))
+            })) 
         }];
 
         const document = await cortiClient.documents.create(
@@ -177,8 +159,13 @@ app.post("/api/interactions/:id/documents", async (req, res) => {
         console.log("Document generated:", document.id);
         res.json(document);
     } catch (err) {
-        console.error("Generate document error:", err);
-        res.status(500).json({ error: "Failed to generate document" });
+        if (err instanceof Error) {
+            console.log("Error:", err.message);
+            res.status(500).json({ error: err.message });
+        } else {
+            console.error("Unknown error:", err);
+            res.status(500).json({ error: "An unknown error occurred" });
+        }
     }
 });
 
@@ -193,7 +180,7 @@ app.post("/api/tools/coding", async (req, res) => {
         }
 
         const context = [{
-            type: 'documentId',
+            type: 'documentId' as const,
             documentId: documentId
         }];
 
@@ -202,8 +189,13 @@ app.post("/api/tools/coding", async (req, res) => {
         console.log("Code predictions and all possible code candidates generated")
         res.json(codes);
     } catch (err) {
-        console.error("Predict codes error:", err);
-        res.status(500).json({ error: "Failed to predict codes" });
+        if (err instanceof Error) {
+            console.log("Error:", err.message);
+            res.status(500).json({ error: err.message });
+        } else {
+            console.error("Unknown error:", err);
+            res.status(500).json({ error: "An unknown error occurred" });
+        }
     }
 });
 

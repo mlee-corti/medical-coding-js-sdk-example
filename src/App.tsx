@@ -3,18 +3,75 @@ import './App.css';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
+interface Interaction {
+  interactionId: string;
+}
+
+interface Recording {
+  recordingId: string;
+}
+
+interface Template {
+  key: string;
+  name: string;
+}
+
+interface DocumentSection {
+  key: string;
+  name: string;
+  text: string;
+  sort: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Document {
+  id: string;
+  name: string;
+  templateRef: string;
+  sections: DocumentSection[];
+  createdAt: string;
+  updatedAt: string;
+  outputLanguage: string;
+}
+
+interface Evidence {
+  text: string;
+  source: string;
+}
+
+interface Code {
+  system: string;
+  code: string;
+  display: string;
+  evidences: Evidence[];
+}
+
+interface CodesResponse {
+  codes: Code[];
+  candidates: Code[];
+  usageInfo: {
+    creditsConsumed: number;
+  };
+}
+
 function App() {
-  const [interactionId, setInteractionId] = useState(null);
-  const [recordingId, setRecordingId] = useState(null);
-  const [templates, setTemplates] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [audioFile, setAudioFile] = useState(null);
-  const [document, setDocument] = useState(null);
-  const [codes, setCodes] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [step, setStep] = useState(1);
-  const [expandedCodes, setExpandedCodes] = useState(new Set());
+    const getErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) return err.message;
+    return String(err);
+  };
+
+  const [interactionId, setInteractionId] = useState<string | null>(null);
+  const [recordingId, setRecordingId] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [document, setDocument] = useState<Document | null>(null);
+  const [codes, setCodes] = useState<CodesResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<number>(1);
+  const [expandedCodes, setExpandedCodes] = useState<Set<string>>(new Set());
 
   // Fetch templates on mount
   useEffect(() => {
@@ -27,12 +84,12 @@ function App() {
       const data = await response.json();
       setTemplates(data);
     } catch (err) {
-      setError('Failed to fetch templates: ' + err.message);
+      setError('Failed to fetch templates: ' + getErrorMessage(err));
     }
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setAudioFile(file);
       setError(null);
@@ -54,7 +111,7 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
-      const interactionData = await interactionRes.json();
+      const interactionData: Interaction = await interactionRes.json();
       setInteractionId(interactionData.interactionId);
 
       // Step 2: Upload recording
@@ -68,13 +125,13 @@ function App() {
           body: formData
         }
       );
-      const recordingData = await recordingRes.json();
+      const recordingData: Recording = await recordingRes.json();
       setRecordingId(recordingData.recordingId);
 
       setStep(2);
       setError(null);
     } catch (err) {
-      setError('Failed to upload recording: ' + err.message);
+      setError('Failed to generate document: ' + getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -109,7 +166,7 @@ function App() {
       setStep(3);
       setError(null);
     } catch (err) {
-      setError('Failed to generate document: ' + err.message);
+      setError('Failed to predict codes: ' + getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -139,7 +196,7 @@ function App() {
       setStep(4);
       setError(null);
     } catch (err) {
-      setError('Failed to predict codes: ' + err.message);
+      setError('Failed to predict codes: ' + getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -157,7 +214,7 @@ function App() {
     setExpandedCodes(new Set());
   };
 
-  const toggleCodeExpansion = (codeId) => {
+  const toggleCodeExpansion = (codeId: string) => {
     setExpandedCodes(prev => {
       const newSet = new Set(prev);
       if (newSet.has(codeId)) {
