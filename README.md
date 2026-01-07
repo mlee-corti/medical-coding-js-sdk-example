@@ -75,7 +75,7 @@ ENVIRONMENT=us
 PORT=3000
 ```
 
-Get credentials from [Corti Console](https://console.corti.app) → Settings → API Credentials.
+Get credentials from [Corti Console](https://console.corti.app) → API Clients
 
 ### 3. Start the Application
 
