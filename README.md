@@ -1,12 +1,12 @@
 # Medical Coding Assistant
 
-A full-stack application for processing medical audio recordings, generating clinical documents, and predicting medical codes using the Corti API and JavaScript SDK.
+A full-stack TypeScript application for processing medical audio recordings, generating clinical documents, and predicting medical codes using the Corti API and JavaScript SDK.
 
 ## Features
 
 - **Audio Recording Upload**: Upload and process medical audio recordings
 - **Template Selection**: Choose from available document templates
-- **Clinical Fact Extraction**: Automatic extraction of structured medical data using Asynchronous Extraction
+- **Clinical Fact Extraction**: Automatic extraction of structured medical data using FactsR™
 - **Document Generation**: Generate SOAP notes and clinical documents
 - **Medical Code Prediction**: Predict ICD-10-CM, ICD-10-PCS, and CPT codes with evidence
 - **Interactive UI**: Expandable codes with evidence, progressive workflow, visual feedback
@@ -15,26 +15,30 @@ A full-stack application for processing medical audio recordings, generating cli
 
 - **Node.js** 18.0.0 or higher
 - **npm** (included with Node.js)
+- **TypeScript** 5.0 or higher
 - **Corti API credentials** - Get them from the [Corti Console](https://console.corti.app)
 
 ## Project Structure
 
 ```plaintext
-medical-coding-app/
-├── src/                     # React frontend
-│   ├── App.jsx
+medical-coding-js-sdk-example/
+├── src/                     # React frontend (TypeScript)
+│   ├── App.tsx
 │   ├── App.css
-│   ├── main.jsx
+│   ├── main.tsx
 │   └── index.css
-├── backend/                 # Node.js server
-│   ├── server.js
-│   ├── cortiClient.js
-│   ├── codingHelper.js
+├── backend/                 # Node.js server (TypeScript)
+│   ├── server.ts
+│   ├── cortiClient.ts
+│   ├── codingHelper.ts
+│   ├── tsconfig.json
 │   ├── package.json
 │   └── .env                 # Your credentials
 ├── index.html
+├── tsconfig.json
+├── tsconfig.node.json
 ├── package.json
-├── vite.config.js
+├── vite.config.ts
 └── README.md
 ```
 
@@ -51,6 +55,13 @@ npm install
 cd ..
 npm install
 ```
+
+**Note**: If you get an error about `@corti/sdk` version, check the actual installed version:
+```bash
+npm list @corti/sdk
+```
+You can find the correct version from the [Corti SDK on npm](https://www.npmjs.com/package/@corti/sdk).
+Then update `backend/package.json` with the correct version number.
 
 ### 2. Configure Environment
 
@@ -73,6 +84,8 @@ Get credentials from [Corti Console](https://console.corti.app) → Settings →
 cd backend
 npm run dev
 ```
+
+The backend uses `tsx` for TypeScript execution with auto-reload.
 
 **Terminal 2 - Frontend:**
 ```bash
@@ -149,7 +162,7 @@ const codes = await corti.coding.predict(documentId, {
 | `CLIENT_ID`     | Yes      | Your Corti API client ID             |
 | `CLIENT_SECRET` | Yes      | Your Corti API client secret         |
 | `TENANT_NAME`   | Yes      | Your organization's tenant name      |
-| `ENVIRONMENT`   | Yes      | Corti region: `us`, `eu`, or `dev`   |
+| `ENVIRONMENT`   | Yes      | Corti region: `us` or `eu`           |
 | `PORT`          | No       | Backend server port (default: 3000)  |
 
 ## Troubleshooting
@@ -174,14 +187,28 @@ const codes = await corti.coding.predict(documentId, {
 - Check backend logs for API errors
 - Ensure recording has clear medical terminology
 
+**TypeScript errors about "unknown" type**
+- Use type guards: `if (err instanceof Error) { err.message }`
+- Or use helper function: `getErrorMessage(err)`
+
+**"Cannot find module" with .js extension**
+- This is expected with TypeScript + ES modules
+- Keep `.js` extensions in import statements
+- TypeScript will handle the resolution correctly
+
+**@corti/sdk version mismatch**
+- Check actual installed version: `npm list @corti/sdk`
+- Update `package.json` to match the installed version
+- The SDK may not have a 1.0.0 version - use the actual version
+
 ## Development
 
 ### Development Mode (auto-reload)
 ```bash
-# Backend
+# Backend (uses tsx with watch mode)
 cd backend && npm run dev
 
-# Frontend (from root)
+# Frontend (uses Vite HMR)
 npm run dev
 ```
 
@@ -191,15 +218,25 @@ npm run dev
 npm run build
 npm run preview
 
-# Backend
-cd backend && npm start
+# Backend (compiles TypeScript to JavaScript)
+cd backend
+npm run build
+npm start
 ```
+
+### TypeScript Notes
+
+- **Frontend**: Uses Vite with React TypeScript template
+- **Backend**: Uses `tsx` for development (faster than ts-node, better ES module support)
+- **Imports**: Keep `.js` extensions in imports for ES module compatibility
+- **Type Safety**: All event handlers and API responses are typed
 
 ## Tech Stack
 
-- **Frontend**: React 19, Vite, CSS3
-- **Backend**: Node.js, Express, Multer
+- **Frontend**: React 19, TypeScript, Vite, CSS3
+- **Backend**: Node.js, Express, TypeScript, Multer
 - **API Client**: [@corti/sdk](https://www.npmjs.com/package/@corti/sdk)
+- **Dev Tools**: tsx (TypeScript runner), Vite (build tool)
 
 ## Resources
 

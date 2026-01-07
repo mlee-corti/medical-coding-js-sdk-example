@@ -17,6 +17,10 @@ dist/
 build/
 *.tsbuildinfo
 
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
 # Logs
 logs
 *.log
@@ -30,12 +34,15 @@ lerna-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS Files
+.DS_Store
+Thumbs.db
 
 # Testing
 coverage/
@@ -45,10 +52,6 @@ coverage/
 *.tmp
 *.temp
 .cache/
-
-# OS Files
-Thumbs.db
-.DS_Store
 
 # Optional npm cache directory
 .npm
@@ -65,3 +68,22 @@ Thumbs.db
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
