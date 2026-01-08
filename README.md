@@ -6,7 +6,7 @@ A full-stack TypeScript application for processing medical audio recordings, gen
 
 - **Audio Recording Upload**: Upload and process medical audio recordings
 - **Template Selection**: Choose from available document templates
-- **Clinical Fact Extraction**: Automatic extraction of structured medical data using FactsR™
+- **Clinical Fact Extraction**: Automatic extraction of structured medical data using Asynchronous Extraction when generating clinical documents
 - **Document Generation**: Generate SOAP notes and clinical documents
 - **Medical Code Prediction**: Predict ICD-10-CM, ICD-10-PCS, and CPT codes with evidence
 - **Interactive UI**: Expandable codes with evidence, progressive workflow, visual feedback
